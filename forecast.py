@@ -7,45 +7,40 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 
 st.title("📈 Application de Prévision avec Régression Linéaire")
-st.write("Ce modèle simple prévoit la prochaine valeur d'une série temporelle basée sur les précédentes.")
+st.write("Chargez un fichier CSV contenant les colonnes `date` et `value`.")
 
-# Charger les données
-try:
-    df = pd.read_csv("data.csv", parse_dates=['date'])
-    df['target'] = df['value'].shift(-1)
-    df.dropna(inplace=True)
+uploaded_file = st.file_uploader("📂 Importez votre fichier CSV", type=["csv"])
 
-    # Séparation des variables
-    X = df[['value']]
-    y = df['target']
+if uploaded_file is not None:
+    try:
+        df = pd.read_csv(uploaded_file, parse_dates=['date'])
+        df['target'] = df['value'].shift(-1)
+        df.dropna(inplace=True)
 
-    # Séparer en train/test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        X = df[['value']]
+        y = df['target']
 
-    # Créer et entraîner le modèle
-    model = LinearRegression()
-    model.fit(X_train, y_train)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Prédiction
-    y_pred = model.predict(X_test)
+        model = LinearRegression()
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
 
-    # Affichage
-    st.subheader("Aperçu des données")
-    st.dataframe(df.head())
+        st.subheader("Aperçu des données")
+        st.dataframe(df.head())
 
-    # Affichage du graphique
-    st.subheader("📊 Résultats de la prévision")
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(y_test.values, label='Valeurs réelles')
-    ax.plot(y_pred, label='Prévisions', linestyle='--')
-    ax.legend()
-    ax.set_title("Prévision sur données temporelles")
-    ax.set_xlabel("Échantillons")
-    ax.set_ylabel("Valeurs")
-    ax.grid(True)
-    st.pyplot(fig)
+        st.subheader("📊 Résultats de la prévision")
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.plot(y_test.values, label='Valeurs réelles')
+        ax.plot(y_pred, label='Prévisions', linestyle='--')
+        ax.legend()
+        ax.set_title("Prévision sur données temporelles")
+        ax.set_xlabel("Échantillons")
+        ax.set_ylabel("Valeurs")
+        ax.grid(True)
+        st.pyplot(fig)
 
-except FileNotFoundError:
-    st.error("❌ Le fichier `data.csv` est introuvable. Assure-toi qu'il est bien dans le dépôt GitHub.")
-except Exception as e:
-    st.error(f"❌ Une erreur est survenue : {e}")
+    except Exception as e:
+        st.error(f"❌ Erreur lors du traitement du fichier : {e}")
+else:
+    st.info("📎 Veuillez importer un fichier CSV pour démarrer.")
